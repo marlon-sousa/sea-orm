@@ -1,4 +1,6 @@
-use crate::{debug_print, DbErr};
+#[cfg(feature = "mock")]
+use crate::debug_print;
+use crate::DbErr;
 use std::fmt;
 
 #[derive(Debug)]
@@ -123,7 +125,9 @@ macro_rules! try_getable_all {
 macro_rules! try_getable_unsigned {
     ( $type: ty ) => {
         impl TryGetable for $type {
+            #[allow(unused_variables)]
             fn try_get(res: &QueryResult, pre: &str, col: &str) -> Result<Self, TryGetError> {
+                #[cfg(any(feature = "sqlx-mysql", feature = "sqlx-sqlite", feature = "mock"))]
                 let column = format!("{}{}", pre, col);
                 match &res.row {
                     #[cfg(feature = "sqlx-mysql")]
@@ -159,7 +163,9 @@ macro_rules! try_getable_unsigned {
 macro_rules! try_getable_mysql {
     ( $type: ty ) => {
         impl TryGetable for $type {
+            #[allow(unused_variables)]
             fn try_get(res: &QueryResult, pre: &str, col: &str) -> Result<Self, TryGetError> {
+                #[cfg(any(feature = "sqlx-mysql", feature = "mock"))]
                 let column = format!("{}{}", pre, col);
                 match &res.row {
                     #[cfg(feature = "sqlx-mysql")]
@@ -193,6 +199,7 @@ macro_rules! try_getable_postgres {
     ( $type: ty ) => {
         impl TryGetable for $type {
             fn try_get(res: &QueryResult, pre: &str, col: &str) -> Result<Self, TryGetError> {
+                #[cfg(any(feature = "sqlx-postgres", feature = "mock"))]
                 let column = format!("{}{}", pre, col);
                 match &res.row {
                     #[cfg(feature = "sqlx-mysql")]
